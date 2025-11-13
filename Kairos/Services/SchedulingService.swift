@@ -1,0 +1,56 @@
+//
+//  SchedulingService.swift
+//  Kairos
+//
+//  Created by Despina Misheva on 10.11.25.
+//
+
+import Foundation
+import SwiftData
+
+// What is the service here? - Its our source of truth since its the only one that can directly manipulate the data in the store
+//It takes care of how the data changes and writes and saves in the db
+enum SchedulingService {
+    @discardableResult
+    static func ensureOccurrence(
+        for task: Task,
+        reference: Date = Date(),
+        calendar: Calendar = Calendar(identifier: .iso8601),
+        ctx: ModelContext
+    ) throws -> TaskOccurrence {
+
+        let (start, end) = task.periodBounds(for: reference, calendar: calendar)
+        let due = task.dueInCurrentPeriod(reference: reference, calendar: calendar)
+
+        if let existing = task.occurrences.first(where: { $0.periodStart == start && $0.periodEnd == end }) {
+            return existing
+        }
+
+        let occ = TaskOccurrence(
+            task: task,
+            periodStart: start,
+            periodEnd: end,
+            dueAt: due,
+            completedDate: nil,
+            wasSuccessful: true
+        )
+        ctx.insert(occ)
+        try ctx.save()
+        return occ
+    }
+
+    static func complete(_ occ: TaskOccurrence, at date: Date = Date(), ctx: ModelContext) throws {
+        guard occ.completedDate == nil else { return }
+        occ.completedDate = date
+
+        var profile = try ctx.fetch(FetchDescriptor<UserProfile>()).first
+        if profile == nil {
+            let p = UserProfile(name: "Local Tester", totalXP: 0)
+            ctx.insert(p); profile = p
+        }
+        if let xp = occ.task?.difficulty.xpReward {
+            profile!.totalXP += xp
+        }
+        try ctx.save()
+    }
+}
