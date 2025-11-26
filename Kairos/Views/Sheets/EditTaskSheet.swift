@@ -20,8 +20,9 @@ struct EditTaskSheet: View {
                     TextField("Title", text: $task.title)
 
                     Picker("Difficulty", selection: $task.difficulty) {
-                        ForEach(Difficulty.allCases) { t in
-                            Text(t.rawValue.capitalized).tag(t)
+                        ForEach(Difficulty.allCases) { tier in
+                            Text("\(label(for: tier))  (\(tier.xpReward) XP)")
+                                .tag(tier)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -43,6 +44,17 @@ struct EditTaskSheet: View {
                         displayedComponents: task.hasSpecificTime ? [.date, .hourAndMinute] : [.date]
                     )
                 }
+                Section("Preview") {
+                    HStack {
+                        Label("\(task.difficulty.xpReward) XP", systemImage: "sparkles")
+                        Spacer()
+                        Text(task.recurrence.rawValue.capitalized)
+                            .font(.footnote)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(.thinMaterial, in: Capsule())
+                    }
+                }
             }
             .navigationTitle("Edit Task")
             .navigationBarTitleDisplayMode(.inline)
@@ -55,4 +67,35 @@ struct EditTaskSheet: View {
             }
         }
     }
+    private func label(for tier: Difficulty) -> String {
+        switch tier {
+        case .trivial: return "Trivial"
+        case .easy:    return "Easy"
+        case .normal:  return "Normal"
+        case .hard:    return "Hard"
+        case .brutal:  return "Brutal"
+        }
+    }
+}
+
+#Preview("EditTaskSheet") {
+    let context = previewContainer.mainContext
+
+    let sample = Task(
+        title: "Sample Task",
+        notes: "Preview",
+        recurrence: .daily,
+        dueDate: Date(),
+        hasSpecificTime: false,
+        difficulty: .normal,
+        createdAt: Date(),
+        isActive: true
+    )
+
+    context.insert(sample)
+
+    return EditTaskSheet(task: sample)
+        .environment(\.modelContext, context)
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
 }
