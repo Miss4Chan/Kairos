@@ -22,7 +22,7 @@ final class Task {
     
     //I dont want to cascade on deletion since if the task occrance was completed at some point we wanna keep that record as such regardless of further changes of that task (edit, delete)
     //I will need to think of a way to do this more effectively since there has to be some type of snapshot that should be saved in case the task drastically changes some fields that it had or didnt have before
-    @Relationship(deleteRule: .cascade, inverse: \TaskOccurrence.task)
+    @Relationship(deleteRule: .noAction, inverse: \TaskOccurrence.task)
     var occurrences: [TaskOccurrence] = []
     
     init(
@@ -58,10 +58,19 @@ extension Task {
             let start = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: reference))!
             let end = calendar.date(byAdding: .day, value: 7, to: start)!.addingTimeInterval(-1)
             return (start, end)
+        case .biWeekly:
+            let start = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: reference))!
+            let end = calendar.date(byAdding: .day, value: 14, to: start)!.addingTimeInterval(-1)
+            return (start, end)
         case .monthly:
             let comps = calendar.dateComponents([.year, .month], from: reference)
             let start = calendar.date(from: comps)!
             let end = calendar.date(byAdding: .month, value: 1, to: start)!.addingTimeInterval(-1)
+            return (start, end)
+        case .biMonthly:
+            let comps = calendar.dateComponents([.year, .month], from: reference)
+            let start = calendar.date(from: comps)!
+            let end = calendar.date(byAdding: .month, value: 2, to: start)!.addingTimeInterval(-1)
             return (start, end)
         case .none:
             let start = calendar.startOfDay(for: reference)

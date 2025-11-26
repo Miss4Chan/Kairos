@@ -43,7 +43,8 @@ struct TasksView: View {
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
-                            ctx.delete(tasks[index])
+                            //ctx.delete(tasks[index])
+                            tasks[index].isActive = false
                         }
                         try? ctx.save()
                     }

@@ -18,14 +18,14 @@ enum SchedulingService {
         calendar: Calendar = Calendar(identifier: .iso8601),
         ctx: ModelContext
     ) throws -> TaskOccurrence {
-
+        
         let (start, end) = task.periodBounds(for: reference, calendar: calendar)
         let due = task.dueInCurrentPeriod(reference: reference, calendar: calendar)
-
+        
         if let existing = task.occurrences.first(where: { $0.periodStart == start && $0.periodEnd == end }) {
             return existing
         }
-
+        
         let occ = TaskOccurrence(
             task: task,
             periodStart: start,
@@ -38,11 +38,17 @@ enum SchedulingService {
         try ctx.save()
         return occ
     }
-
+    
     static func complete(_ occ: TaskOccurrence, at date: Date = Date(), ctx: ModelContext) throws {
         guard occ.completedDate == nil else { return }
         occ.completedDate = date
-
+        
+        if occ.snapshotTitle == nil {
+            occ.snapshotTitle = occ.task?.title
+            occ.snapshotNotes = occ.task?.notes
+            occ.snapshotDifficulty = occ.task?.difficulty
+        }
+        
         var profile = try ctx.fetch(FetchDescriptor<UserProfile>()).first
         if profile == nil {
             let p = UserProfile(name: "Local Tester", totalXP: 0)

@@ -49,14 +49,14 @@ struct HistoryView: View {
                                         .imageScale(.large)
                                         .foregroundStyle(.green)
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(occ.task?.title ?? "Task")
+                                        Text(title(for: occ))
                                             .font(.headline)
                                         HStack(spacing: 8) {
                                             if let when = occ.completedDate {
                                                 Text(DateFormats.timeShort.string(from: when))
                                                     .foregroundStyle(.secondary)
                                             }
-                                            if let xp = occ.task?.difficulty.xpReward, xp > 0 {
+                                            if let xp = xp(for: occ) {
                                                 Label("\(xp)", systemImage: "bolt")
                                                     .labelStyle(.titleAndIcon)
                                                     .foregroundStyle(.secondary)
@@ -84,4 +84,15 @@ struct HistoryView: View {
             return cal.startOfDay(for: when)
         }
     }
+    
+    private func title(for occ: TaskOccurrence) -> String {
+        occ.snapshotTitle ?? occ.task?.title ?? "Task"
+    }
+    
+    private func xp(for occ: TaskOccurrence) -> Int? {
+        let difficulty = occ.snapshotDifficulty ?? occ.task?.difficulty
+        guard let xp = difficulty?.xpReward, xp > 0 else { return nil }
+        return xp
+    }
+    
 }

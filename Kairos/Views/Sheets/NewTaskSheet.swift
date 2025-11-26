@@ -10,59 +10,32 @@ import SwiftData
 
 struct NewTaskSheet: View {
     @Environment(\.modelContext) private var ctx
-
+    
     @State private var title: String = ""
     @State private var recurrence: RecurrenceType = .daily
     @State private var difficulty: Difficulty = .normal
     @State private var hasTime: Bool = false
     @State private var dueDate: Date = Date()
-
+    
     var onClose: () -> Void
-
+    
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Details") {
-                    TextField("Title", text: $title)
-
-                    Picker("Difficulty", selection: $difficulty) {
-                        ForEach(Difficulty.allCases) { tier in
-                            Text(label(for: tier)).tag(tier)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    Picker("Repeat", selection: $recurrence) {
-                        ForEach(RecurrenceType.allCases, id: \.self) { t in
-                            Text(t.rawValue.capitalized).tag(t)
-                        }
-                    }
-
-                    Toggle("Specific time", isOn: $hasTime)
-
-                    DatePicker(
-                        hasTime ? "Due" : "Start Date",
-                        selection: $dueDate,
-                        displayedComponents: hasTime ? [.date, .hourAndMinute] : [.date]
-                    )
-                }
-
-                Section("Preview") {
-                    HStack {
-                        Label("\(difficulty.xpReward) XP", systemImage: "sparkles")
-                        Spacer()
-                        Text(recurrence.rawValue.capitalized)
-                            .font(.footnote)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(.thinMaterial, in: Capsule())
-                    }
-                }
-            }
+            TaskFormView(
+                title: $title,
+                recurrence: $recurrence,
+                difficulty: $difficulty,
+                hasSpecificTime: $hasTime,
+                date: $dueDate,
+                dateLabelWhenTimed: "Due",
+                dateLabelWhenNotTimed: "Start Date"
+            )
             .navigationTitle("New Task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { Button("Close", action: onClose) }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Close", action: onClose)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         let task = Task(
@@ -84,17 +57,8 @@ struct NewTaskSheet: View {
             }
         }
     }
-
-    private func label(for tier: Difficulty) -> String {
-        switch tier {
-        case .trivial: return "Trivial"
-        case .easy:    return "Easy"
-        case .normal:  return "Normal"
-        case .hard:    return "Hard"
-        case .brutal:  return "Brutal"
-        }
-    }
 }
+
 
 #Preview("NewTaskSheet") {
     NewTaskSheet { }

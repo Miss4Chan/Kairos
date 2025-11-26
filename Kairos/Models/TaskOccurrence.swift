@@ -13,14 +13,19 @@ import SwiftData
 @Model
 final class TaskOccurrence {
     @Attribute(.unique) var id: UUID = UUID()
-
+    
     var periodStart: Date
     var periodEnd: Date
     var dueAt: Date
     var completedDate: Date?
     var wasSuccessful: Bool
     var task: Task?
-
+    
+    //Trying to preserve history using "frozen" snapshots of the task at the given time it was accomplished
+    var snapshotTitle: String?
+    var snapshotNotes: String?
+    var snapshotDifficulty: Difficulty?
+    
     init(
         task: Task? = nil,
         periodStart: Date,

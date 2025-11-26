@@ -18,26 +18,39 @@ final class TaskListViewModel: ObservableObject {
                   calendar: Calendar = Calendar(identifier: .iso8601)) -> String {
         let (start, end) = task.periodBounds(for: reference, calendar: calendar)
         let df = task.hasSpecificTime ? DateFormats.dateTimeMediumShort : DateFormats.dateOnlyMedium
-
+        
         switch task.recurrence {
         case .daily:
             if let due = task.dueDate, (start...end).contains(due), task.hasSpecificTime {
                 return df.string(from: due)
             }
             return "Today"
-
+            
         case .weekly:
             if let due = task.dueDate, (start...end).contains(due), task.hasSpecificTime {
                 return df.string(from: due)
             }
             return "Due end of week (\(df.string(from: end)))"
-
+            
+        case .biWeekly:
+            if let due = task.dueDate, (start...end).contains(due), task.hasSpecificTime {
+                return df.string(from: due)
+            }
+            return "Due end of 2-week period (\(df.string(from: end)))"
+            
+            
         case .monthly:
             if let due = task.dueDate, (start...end).contains(due), task.hasSpecificTime {
                 return df.string(from: due)
             }
             return "Due end of month (\(df.string(from: end)))"
-
+            
+        case .biMonthly:
+            if let due = task.dueDate, (start...end).contains(due), task.hasSpecificTime {
+                return df.string(from: due)
+            }
+            return "Due end of 2-month period (\(df.string(from: end)))"
+            
         case .none:
             if let due = task.dueDate {
                 return df.string(from: due)
