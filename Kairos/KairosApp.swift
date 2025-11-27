@@ -10,6 +10,12 @@ import SwiftData
 
 @main
 struct KairosApp: App {
+    @AppStorage("appTheme") private var appThemeRawValue: String = AppTheme.system.rawValue
+
+    private var appTheme: AppTheme {
+        AppTheme(rawValue: appThemeRawValue) ?? .system
+    }
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             UserProfile.self,
@@ -38,7 +44,7 @@ struct KairosApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().preferredColorScheme(appTheme.colorScheme)
         }
         .modelContainer(sharedModelContainer)
     }

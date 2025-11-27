@@ -12,12 +12,17 @@ struct RootTabs: View {
         TabView {
             TodayView()
                 .tabItem { Label("Today", systemImage: "sun.max.fill") }
-
+            
             TasksView()
                 .tabItem { Label("Tasks", systemImage: "checklist") }
             
             HistoryView()
                 .tabItem { Label("History", systemImage: "clock") }
+            
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape")
+                }
         }.background(.ultraThinMaterial)
     }
 }
