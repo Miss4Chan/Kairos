@@ -16,6 +16,8 @@ struct NewTaskSheet: View {
     @State private var difficulty: Difficulty = .normal
     @State private var hasTime: Bool = false
     @State private var dueDate: Date = Date()
+    @State private var selectedCategory: Category? = nil
+    
     
     var onClose: () -> Void
     
@@ -27,8 +29,8 @@ struct NewTaskSheet: View {
                 difficulty: $difficulty,
                 hasSpecificTime: $hasTime,
                 date: $dueDate,
-                dateLabelWhenTimed: "Due",
-                dateLabelWhenNotTimed: "Start Date"
+                selectedCategory: $selectedCategory, dateLabelWhenTimed: "Due",
+                dateLabelWhenNotTimed: "Start Date",
             )
             .navigationTitle("New Task")
             .navigationBarTitleDisplayMode(.inline)
@@ -48,6 +50,7 @@ struct NewTaskSheet: View {
                             createdAt: Date(),
                             isActive: true
                         )
+                        task.category = selectedCategory
                         ctx.insert(task)
                         try? ctx.save()
                         onClose()

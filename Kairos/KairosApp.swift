@@ -20,7 +20,8 @@ struct KairosApp: App {
         let schema = Schema([
             UserProfile.self,
             Task.self,
-            TaskOccurrence.self
+            TaskOccurrence.self,
+            Category.self
         ])
 
         let fm = FileManager.default

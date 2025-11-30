@@ -10,17 +10,17 @@ struct TaskRowCell: View {
     let task: Task
     let isEditing: Bool
     let onTap: () -> Void
-
+    
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(task.title)
                     .fontWeight(.semibold)
-
+                
                 HStack(spacing: 8) {
                     Text(task.recurrence.rawValue.capitalized)
                         .capsuleTag()
-
+                    
                     let xp = task.difficulty.xpReward
                     if xp > 0 {
                         HStack(spacing: 2) {
@@ -31,8 +31,27 @@ struct TaskRowCell: View {
                         .foregroundStyle(.secondary)
                     }
                 }
+                
+                if let category = task.category {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(Color(hex: category.colorHex))
+                            .frame(width: 8, height: 8)
+                        
+                        if let iconName = category.iconName, !iconName.isEmpty {
+                            Image(systemName: iconName)
+                        }
+                        
+                        Text(category.name)
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                }
             }
+            
+            
             Spacer()
+            
             if isEditing {
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))

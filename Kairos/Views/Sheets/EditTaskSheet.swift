@@ -12,6 +12,8 @@ struct EditTaskSheet: View {
     @Environment(\.modelContext) private var ctx
     @Environment(\.dismiss) private var dismiss
     @Bindable var task: Task
+    @State private var selectedCategory: Category?
+    
     
     var body: some View {
         NavigationStack {
@@ -24,6 +26,7 @@ struct EditTaskSheet: View {
                     get: { task.dueDate ?? Date() },
                     set: { task.dueDate = $0 }
                 ),
+                selectedCategory: $task.category,
                 dateLabelWhenTimed: "Due",
                 dateLabelWhenNotTimed: "Date"
             )
@@ -41,10 +44,14 @@ struct EditTaskSheet: View {
                     .disabled(task.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+            .onAppear {
+                if selectedCategory == nil {
+                    selectedCategory = task.category
+                }
+            }
         }
     }
 }
-
 #Preview("EditTaskSheet") {
     let context = previewContainer.mainContext
     

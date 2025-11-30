@@ -20,10 +20,11 @@ final class Task {
     var createdAt: Date
     var isActive: Bool
     
-    //I dont want to cascade on deletion since if the task occrance was completed at some point we wanna keep that record as such regardless of further changes of that task (edit, delete)
-    //I will need to think of a way to do this more effectively since there has to be some type of snapshot that should be saved in case the task drastically changes some fields that it had or didnt have before
+    //Changed it to noAction and added snapshot fields in the TaskOccurrence
     @Relationship(deleteRule: .noAction, inverse: \TaskOccurrence.task)
     var occurrences: [TaskOccurrence] = []
+    
+    var category: Category?
     
     init(
         title: String,

@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
-
+    @Environment(\.modelContext) private var modelContext
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -22,7 +24,7 @@ struct SettingsView: View {
                     }
                     .pickerStyle(.segmented)
                 }
-
+                
                 Section("Tasks") {
                     NavigationLink("Manage categories") {
                         CategoriesSettingsView()
@@ -31,15 +33,11 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
         }
+        .task {
+            CategorySeeder.seedDefaultsIfNeeded(modelContext: modelContext)
+        }
     }
-}
-
-//Take this into another file when it actually contains some logic
-struct CategoriesSettingsView: View {
-    var body: some View {
-        Text("Categories screen coming soon")
-            .navigationTitle("Categories")
-    }
+    
 }
 
 #Preview {
