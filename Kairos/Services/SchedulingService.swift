@@ -10,6 +10,7 @@ import SwiftData
 
 // What is the service here? - Its our source of truth since its the only one that can directly manipulate the data in the store
 //It takes care of how the data changes and writes and saves in the db
+//It is stateless basically an enum with just static functions
 enum SchedulingService {
     @discardableResult
     static func ensureOccurrence(
@@ -57,6 +58,38 @@ enum SchedulingService {
         if let xp = occ.task?.difficulty.xpReward {
             profile!.totalXP += xp
         }
+        try ctx.save()
+    }
+    
+    static func undo(
+        _ occ: TaskOccurrence,
+        ctx: ModelContext,
+        calendar: Calendar = Calendar(identifier: .iso8601)
+    ) throws {
+        guard let completedAt = occ.completedDate else { return }
+        
+        
+        var profile = try ctx.fetch(FetchDescriptor<UserProfile>()).first
+        if profile == nil {
+            let p = UserProfile(name: "Local Tester", totalXP: 0)
+            ctx.insert(p); profile = p
+        }
+        
+        if let task = occ.task,
+           let xp = task.difficulty.xpReward as Int? {
+            let current = profile?.totalXP ?? 0
+            profile?.totalXP = max(0, current - xp)
+        }
+        
+        if let task = occ.task, task.recurrence == .none {
+            task.isActive = true
+        }
+        
+        occ.completedDate = nil
+        occ.snapshotTitle = nil
+        occ.snapshotNotes = nil
+        occ.snapshotDifficulty = nil
+        
         try ctx.save()
     }
 }

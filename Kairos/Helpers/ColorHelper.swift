@@ -27,7 +27,6 @@ private struct ColorChoiceCircle: View {
                                 .strokeBorder(.primary, lineWidth: 2)
                         }
                     }
-                
                 Text(title)
                     .font(.caption2)
             }

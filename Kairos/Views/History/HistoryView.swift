@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct HistoryView: View {
+    @Environment(\.modelContext) private var ctx
+    
     @Query(
         filter: #Predicate<TaskOccurrence> { $0.completedDate != nil },
         sort: [SortDescriptor(\TaskOccurrence.completedDate, order: .reverse)]
@@ -67,6 +69,14 @@ struct HistoryView: View {
                                     Spacer()
                                 }
                                 .padding(.vertical, 4)
+                                .swipeActions(edge: .trailing) {
+                                    Button {
+                                        try? SchedulingService.undo(occ, ctx: ctx)
+                                    } label: {
+                                        Label("Undo", systemImage: "arrow.uturn.backward")
+                                    }
+                                    .tint(.orange)
+                                }
                             }
                         }
                     }

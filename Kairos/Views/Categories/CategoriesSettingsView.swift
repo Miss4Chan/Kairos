@@ -108,6 +108,7 @@ struct CategoriesSettingsView: View {
                             isPresentingCategorySheet = false
                             resetForm()
                             editingCategory = nil
+                            editMode = .inactive
                         }
                     }
                     
@@ -188,6 +189,7 @@ struct CategoriesSettingsView: View {
         resetForm()
         editingCategory = nil
         isPresentingCategorySheet = false
+        editMode = .inactive
     }
 }
 
