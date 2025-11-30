@@ -18,7 +18,6 @@ struct CategoriesSettingsView: View {
     @State private var isPresentingCategorySheet = false
     @State private var editingCategory: Category? = nil
     
-    // Needed for the sheet
     @State private var newName: String = ""
     @State private var newIconName: String = ""
     @State private var selectedColor: Color = Color(hex: "#3D85C6")
@@ -38,7 +37,6 @@ struct CategoriesSettingsView: View {
         "checkmark.circle.fill",
         "clock.fill"
     ]
-    
     var body: some View {
         let isEditing = editMode != .inactive
         
@@ -48,42 +46,35 @@ struct CategoriesSettingsView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(categories) { category in
-                    HStack(spacing: 12) {
-                        if let iconName = category.iconName, !iconName.isEmpty {
-                            Image(systemName: iconName)
-                        }
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(category.name)
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(Color(hex: category.colorHex))
-                                    .frame(width: 10, height: 10)
-                                if let iconName = category.iconName, !iconName.isEmpty {
-                                    Text(iconName)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                        
-                        Spacer()
-                        
-                        if isEditing {
-                            Image(systemName: "chevron.right")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-                    .contentShape(Rectangle())
+                    CategoryRowView(
+                        category: category,
+                        showsChevron: isEditing,
+                        usedCount: taskCount(for: category)
+                    )
                     .onTapGesture {
                         if isEditing {
                             startEditing(category)
                         }
                     }
                 }
+                //We need to safe delete the categories and make sure that we assign the tasks with no category if the cat is deleted
+                //Don't try without this - I broke my DB and had to recreate everything :((((( r.i.p my history
                 .onDelete { indexSet in
                     for index in indexSet {
                         let category = categories[index]
+                        let categoryID = category.id
+                        
+                        let fetch = FetchDescriptor<Task>(
+                            predicate: #Predicate<Task> { task in
+                                task.category?.id == categoryID
+                            }
+                        )
+                        
+                        if let tasksUsingCategory = try? modelContext.fetch(fetch) {
+                            for task in tasksUsingCategory {
+                                task.category = nil
+                            }
+                        }
                         modelContext.delete(category)
                     }
                     try? modelContext.save()
@@ -104,55 +95,12 @@ struct CategoriesSettingsView: View {
         .environment(\.editMode, $editMode)
         .sheet(isPresented: $isPresentingCategorySheet) {
             NavigationStack {
-                Form {
-                    Section("Name") {
-                        TextField("Category name", text: $newName)
-                    }
-                    
-                    Section("Icon") {
-                        let columns = [GridItem(.adaptive(minimum: 40))]
-                        LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(suggestedSymbols, id: \.self) { symbol in
-                                Button {
-                                    newIconName = symbol
-                                } label: {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(
-                                                newIconName == symbol ? Color.accentColor : Color.secondary.opacity(0.3),
-                                                lineWidth: newIconName == symbol ? 2 : 1
-                                            )
-                                            .frame(width: 40, height: 40)
-                                        Image(systemName: symbol)
-                                            .font(.system(size: 18))
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                        
-                        TextField("Custom SF Symbol name (optional)", text: $newIconName)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                        
-                        if !newIconName.isEmpty {
-                            HStack(spacing: 8) {
-                                Text("Preview:")
-                                Image(systemName: newIconName)
-                            }
-                            .font(.caption)
-                        }
-                        
-                        Text("Tap an icon above or enter any valid SF Symbol name.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Section("Color") {
-                        ColorPicker("Category color", selection: $selectedColor, supportsOpacity: false)
-                    }
-                }
+                CategoryFormView(
+                    name: $newName,
+                    iconName: $newIconName,
+                    selectedColor: $selectedColor,
+                    suggestedSymbols: suggestedSymbols
+                )
                 .navigationTitle(editingCategory == nil ? "New Category" : "Edit Category")
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -175,6 +123,23 @@ struct CategoriesSettingsView: View {
     }
     
     // MARK: - Actions
+    
+    private func taskCount(for category: Category) -> Int {
+        let categoryID = category.id
+        
+        let fetch = FetchDescriptor<Task>(
+            predicate: #Predicate<Task> { task in
+                task.category?.id == categoryID
+            }
+        )
+        
+        do {
+            let tasksUsingCategory = try modelContext.fetch(fetch)
+            return tasksUsingCategory.count
+        } catch {
+            return 0
+        }
+    }
     
     private func startAddingCategory() {
         editingCategory = nil
@@ -231,90 +196,4 @@ struct CategoriesSettingsView: View {
         CategoriesSettingsView()
     }
     .modelContainer(for: Category.self, inMemory: true)
-}
-
-private struct ColorChoiceCircle: View {
-    let title: String
-    let hex: String
-    @Binding var selectedHex: String
-    
-    var body: some View {
-        Button {
-            selectedHex = hex
-        } label: {
-            VStack {
-                Circle()
-                    .fill(Color(hex: hex))
-                    .frame(width: 24, height: 24)
-                    .overlay {
-                        if selectedHex == hex {
-                            Circle()
-                                .strokeBorder(.primary, lineWidth: 2)
-                        }
-                    }
-                
-                Text(title)
-                    .font(.caption2)
-            }
-        }
-        .buttonStyle(.plain)
-    }
-}
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 8: // ARGB
-            a = (int & 0xFF000000) >> 24
-            r = (int & 0x00FF0000) >> 16
-            g = (int & 0x0000FF00) >> 8
-            b = int & 0x000000FF
-        case 6: // RGB
-            a = 255
-            r = (int & 0xFF0000) >> 16
-            g = (int & 0x00FF00) >> 8
-            b = int & 0x0000FF
-        default:
-            a = 255
-            r = 0
-            g = 0
-            b = 0
-        }
-        
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-    }
-    
-    //TODO: Explain this later
-    func toHex() -> String? {
-#if canImport(UIKit)
-        let uiColor = UIColor(self)
-        
-        var r: CGFloat = 0
-        var g: CGFloat = 0
-        var b: CGFloat = 0
-        var a: CGFloat = 0
-        
-        guard uiColor.getRed(&r, green: &g, blue: &b, alpha: &a) else {
-            return nil
-        }
-        
-        let ri = Int(round(r * 255))
-        let gi = Int(round(g * 255))
-        let bi = Int(round(b * 255))
-        
-        return String(format: "#%02X%02X%02X", ri, gi, bi)
-#else
-        return nil
-#endif
-    }
 }
