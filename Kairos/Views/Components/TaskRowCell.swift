@@ -7,7 +7,7 @@
 import SwiftUI
 import SwiftData
 struct TaskRowCell: View {
-    let task: Task
+    let task: UserTask
     let isEditing: Bool
     let onTap: () -> Void
     
@@ -71,7 +71,7 @@ struct TaskRowCell: View {
 
 #Preview {
     struct Wrap: View {
-        let task = Task(title: "Pay bills", recurrence: .weekly, difficulty: .normal)
+        let task = UserTask(title: "Pay bills", recurrence: .weekly, difficulty: .normal)
         var body: some View {
             List {
                 TaskRowCell(task: task, isEditing: true, onTap: {})

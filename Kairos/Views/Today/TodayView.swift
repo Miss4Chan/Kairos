@@ -11,17 +11,19 @@ import SwiftData
 struct TodayView: View {
     @Environment(\.modelContext) private var ctx
 
-    @Query(filter: #Predicate<Task> { $0.isActive == true },
-           sort: [SortDescriptor(\Task.createdAt, order: .reverse)])
-    private var tasks: [Task]
+    @Query(filter: #Predicate<UserTask> { $0.isActive == true },
+           sort: [SortDescriptor(\UserTask.createdAt, order: .reverse)])
+    private var tasks: [UserTask]
 
     // Observe profile so UI auto-updates when XP changes
     @Query private var profiles: [UserProfile]
     private var profile: UserProfile? { profiles.first }
 
     @StateObject private var vm = TaskListViewModel()
+    
+    @State private var memeToShow: Meme?
 
-    private var pendingToday: [Task] {
+    private var pendingToday: [UserTask] {
         vm.pendingTasks(from: tasks, ctx: ctx)
     }
 
@@ -77,6 +79,19 @@ struct TodayView: View {
                 }
             }
             .navigationTitle("Today")
+            .onChange(of: vm.completionEventID) {
+                guard vm.completionEventID != nil else { return }
+                //Cursed be i had to rename my class for this ahahahaha
+                Task {
+                    memeToShow = await MemeService.fetchWholesomeMeme()
+                    vm.completionEventID = nil //kill it
+                }
+            }
+            .sheet(item: $memeToShow) { meme in
+                MemeRewardView(meme: meme)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
         }
     }
 }

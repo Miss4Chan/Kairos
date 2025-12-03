@@ -17,58 +17,53 @@ struct HistoryView: View {
     )
     private var completed: [TaskOccurrence]
     
-    private var sortedDays: [Date] {
-        Array(groupedByDay.keys).sorted(by: >)
-    }
+    @Query(sort: \Category.name) private var categories: [Category]
     
-    private func items(on day: Date) -> [TaskOccurrence] {
-        groupedByDay[day] ?? []
-    }
+    @StateObject private var vm = HistoryViewModel()
     
+    @State private var searchText: String = ""
+    @State private var selectedCategoryID: UUID? = nil
+    
+    @FocusState private var searchFocused: Bool
+    @State private var showHistoryInfo = false
+    
+    private var sections: [HistoryViewModel.DaySection] {
+        vm.sections(
+            completed: completed,
+            searchText: searchText,
+            selectedCategoryID: selectedCategoryID
+        )
+    }
     
     var body: some View {
         NavigationStack {
-            if completed.isEmpty {
-                ScrollView {
-                    VStack(spacing: 24) {
+            List {
+                if sections.isEmpty {
+                    VStack(spacing: 12) {
                         Image(systemName: "clock.arrow.circlepath")
                             .font(.system(size: 44))
                             .foregroundStyle(.secondary)
-                        Text("No history yet").font(.title3.weight(.semibold))
-                        Text("Your completed tasks will appear here.")
+                        
+                        Text(searchText.isEmpty && selectedCategoryID == nil ? "No history yet" : "No matches")
+                            .font(.title3.weight(.semibold))
+                        
+                        Text(vm.emptyMessage(searchText: searchText, selectedCategoryID: selectedCategoryID))
                             .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
                     }
-                    .padding(.top, 64)
-                }
-                .navigationTitle("History")
-            } else {
-                List {
-                    ForEach(sortedDays, id: \.self) { day in
-                        Section(DateFormats.dayMedium.string(from: day)) {
-                            ForEach(items(on: day), id: \.id) { occ in
-                                HStack(spacing: 12) {
-                                    Image(systemName: "checkmark.seal.fill")
-                                        .imageScale(.large)
-                                        .foregroundStyle(.green)
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(title(for: occ))
-                                            .font(.headline)
-                                        HStack(spacing: 8) {
-                                            if let when = occ.completedDate {
-                                                Text(DateFormats.timeShort.string(from: when))
-                                                    .foregroundStyle(.secondary)
-                                            }
-                                            if let xp = xp(for: occ) {
-                                                Label("\(xp)", systemImage: "bolt")
-                                                    .labelStyle(.titleAndIcon)
-                                                    .foregroundStyle(.secondary)
-                                            }
-                                        }
-                                        .font(.subheadline)
-                                    }
-                                    Spacer()
-                                }
-                                .padding(.vertical, 4)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 48)
+                    .listRowBackground(Color.clear)
+                } else {
+                    ForEach(sections) { section in
+                        Section(DateFormats.dayMedium.string(from: section.day)) {
+                            ForEach(section.items, id: \.id) { occ in
+                                HistoryRowView(
+                                    occ: occ,
+                                    title: vm.title(for: occ),
+                                    xp: vm.xp(for: occ)
+                                )
                                 .swipeActions(edge: .trailing) {
                                     Button {
                                         try? SchedulingService.undo(occ, ctx: ctx)
@@ -81,28 +76,63 @@ struct HistoryView: View {
                         }
                     }
                 }
-                .listStyle(.insetGrouped)
-                .navigationTitle("History")
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle("History")
+            .toolbar { toolbarContent }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .searchFocused($searchFocused)
+        }
+        .alert("Tip", isPresented: $showHistoryInfo) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("You can undo completed tasks by swiping them in the History list.")
+        }
+        
+    }
+    
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Button {
+                showHistoryInfo = true
+            } label: {
+                Image(systemName: "info.circle")
+            }
+        }
+        
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            Menu {
+                Button {
+                    selectedCategoryID = nil
+                } label: {
+                    Label("All categories", systemImage: selectedCategoryID == nil ? "checkmark" : "")
+                }
+                
+                if !categories.isEmpty {
+                    Divider()
+                    ForEach(categories) { cat in
+                        Button {
+                            selectedCategoryID = cat.id
+                        } label: {
+                            Label(cat.name, systemImage: (selectedCategoryID == cat.id) ? "checkmark" : "")
+                        }
+                    }
+                }
+            } label: {
+                Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+            }
+            
+            if selectedCategoryID != nil || !searchText.isEmpty {
+                Button("Clear") {
+                    searchText = ""
+                    selectedCategoryID = nil
+                }
             }
         }
     }
-    
-    private var groupedByDay: [Date: [TaskOccurrence]] {
-        let cal = Calendar(identifier: .iso8601)
-        return Dictionary(grouping: completed) { occ in
-            let when = occ.completedDate ?? .distantPast
-            return cal.startOfDay(for: when)
-        }
-    }
-    
-    private func title(for occ: TaskOccurrence) -> String {
-        occ.snapshotTitle ?? occ.task?.title ?? "Task"
-    }
-    
-    private func xp(for occ: TaskOccurrence) -> Int? {
-        let difficulty = occ.snapshotDifficulty ?? occ.task?.difficulty
-        guard let xp = difficulty?.xpReward, xp > 0 else { return nil }
-        return xp
-    }
-    
+}
+
+#Preview("HistoryView") {
+    PreviewHarness(root: HistoryView())
 }

@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class Task {
+final class UserTask {
     @Attribute(.unique) var id: UUID = UUID()
     var title: String
     var notes: String?
@@ -48,7 +48,7 @@ final class Task {
 }
 
 // MARK: - These are some functions that take care of the state transition and making sure that the start and ends are correctly caulcated depening on the type
-extension Task {
+extension UserTask {
     func periodBounds(for reference: Date, calendar: Calendar = Calendar(identifier: .iso8601)) -> (start: Date, end: Date) {
         switch recurrence {
         case .daily:

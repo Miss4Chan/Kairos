@@ -13,7 +13,13 @@ import SwiftData
 //He gets action from the ui and says to the service "please complete this and tell me what i should update in my views"
 @MainActor //This means that its a singleton - it will be initialized once upon creaton and does not get recreated for every other call
 final class TaskListViewModel: ObservableObject {
-    func subtitle(for task: Task,
+    // One-shot UI trigger for rewards (meme popup).
+    // SwiftData changes (occurrence completed / XP updated) refresh views, but they don't reliably mean
+    // “show a reward exactly once right now”. This published event lets the UI present the meme once
+    // per completion, without tying the popup to persisted state.
+    @Published var completionEventID: UUID?
+    
+    func subtitle(for task: UserTask,
                   reference: Date = Date(),
                   calendar: Calendar = Calendar(identifier: .iso8601)) -> String {
         let (start, end) = task.periodBounds(for: reference, calendar: calendar)
@@ -59,7 +65,7 @@ final class TaskListViewModel: ObservableObject {
         }
     }
     
-    func isCompletedForCurrentPeriod(_ task: Task,
+    func isCompletedForCurrentPeriod(_ task: UserTask,
                                      ctx: ModelContext,
                                      reference: Date = Date(),
                                      calendar: Calendar = Calendar(identifier: .iso8601)) -> Bool {
@@ -77,16 +83,16 @@ final class TaskListViewModel: ObservableObject {
     }
     
     
-    func pendingTasks(from tasks: [Task],
+    func pendingTasks(from tasks: [UserTask],
                       ctx: ModelContext,
                       reference: Date = Date(),
-                      calendar: Calendar = Calendar(identifier: .iso8601)) -> [Task] {
+                      calendar: Calendar = Calendar(identifier: .iso8601)) -> [UserTask] {
         tasks.filter { task in
             !isCompletedForCurrentPeriod(task, ctx: ctx, reference: reference, calendar: calendar)
         }
     }
     
-    func complete(task: Task, ctx: ModelContext) throws {
+    func complete(task: UserTask, ctx: ModelContext) throws {
         let occ = try SchedulingService.ensureOccurrence(for: task, ctx: ctx)
         
         guard occ.completedDate == nil else { return }
@@ -97,5 +103,7 @@ final class TaskListViewModel: ObservableObject {
             task.isActive = false
             try ctx.save()
         }
+        
+        completionEventID = UUID()
     }
 }

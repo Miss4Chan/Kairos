@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct SwipeToCompleteRow: View {
-    let task: Task
+    let task: UserTask
     let subtitle: String
-    let onComplete: (Task) -> Void
+    let onComplete: (UserTask) -> Void
 
     @State private var offsetX: CGFloat = 0
     @State private var didTriggerHaptic = false

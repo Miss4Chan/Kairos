@@ -19,15 +19,15 @@ struct PreviewHarness<Content: View>: View {
 @MainActor
 let previewContainer: ModelContainer = {
     do {
-        let schema = Schema([UserProfile.self, Task.self, TaskOccurrence.self])
+        let schema = Schema([UserProfile.self, UserTask.self, TaskOccurrence.self])
         let conf = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: schema, configurations: [conf])
         let ctx = ModelContext(container)
-        if (try? ctx.fetch(FetchDescriptor<Task>()))?.isEmpty ?? true {
-            let t1 = Task(title: "Brush teeth", recurrence: .daily)
-            let t2 = Task(title: "Pay bills",  recurrence: .weekly)
-            let t3 = Task(title: "Clean fridge", recurrence: .monthly)
-            let t4 = Task(title: "Call mom",
+        if (try? ctx.fetch(FetchDescriptor<UserTask>()))?.isEmpty ?? true {
+            let t1 = UserTask(title: "Brush teeth", recurrence: .daily)
+            let t2 = UserTask(title: "Pay bills",  recurrence: .weekly)
+            let t3 = UserTask(title: "Clean fridge", recurrence: .monthly)
+            let t4 = UserTask(title: "Call mom",
                           recurrence: .none,
                           dueDate: Date().addingTimeInterval(3600),
                           hasSpecificTime: true)

@@ -64,8 +64,8 @@ struct CategoriesSettingsView: View {
                         let category = categories[index]
                         let categoryID = category.id
                         
-                        let fetch = FetchDescriptor<Task>(
-                            predicate: #Predicate<Task> { task in
+                        let fetch = FetchDescriptor<UserTask>(
+                            predicate: #Predicate<UserTask> { task in
                                 task.category?.id == categoryID
                             }
                         )
@@ -128,8 +128,8 @@ struct CategoriesSettingsView: View {
     private func taskCount(for category: Category) -> Int {
         let categoryID = category.id
         
-        let fetch = FetchDescriptor<Task>(
-            predicate: #Predicate<Task> { task in
+        let fetch = FetchDescriptor<UserTask>(
+            predicate: #Predicate<UserTask> { task in
                 task.category?.id == categoryID
             }
         )

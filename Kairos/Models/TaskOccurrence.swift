@@ -19,7 +19,7 @@ final class TaskOccurrence {
     var dueAt: Date
     var completedDate: Date?
     var wasSuccessful: Bool
-    var task: Task?
+    var task: UserTask?
     
     //Trying to preserve history using "frozen" snapshots of the task at the given time it was accomplished
     var snapshotTitle: String?
@@ -27,7 +27,7 @@ final class TaskOccurrence {
     var snapshotDifficulty: Difficulty?
     
     init(
-        task: Task? = nil,
+        task: UserTask? = nil,
         periodStart: Date,
         periodEnd: Date,
         dueAt: Date,

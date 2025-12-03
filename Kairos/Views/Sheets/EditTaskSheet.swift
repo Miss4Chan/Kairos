@@ -11,7 +11,7 @@ import SwiftData
 struct EditTaskSheet: View {
     @Environment(\.modelContext) private var ctx
     @Environment(\.dismiss) private var dismiss
-    @Bindable var task: Task
+    @Bindable var task: UserTask
     @State private var selectedCategory: Category?
     
     
@@ -55,7 +55,7 @@ struct EditTaskSheet: View {
 #Preview("EditTaskSheet") {
     let context = previewContainer.mainContext
     
-    let sample = Task(
+    let sample = UserTask(
         title: "Sample Task",
         notes: "Preview",
         recurrence: .daily,

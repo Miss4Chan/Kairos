@@ -14,7 +14,7 @@ import SwiftData
 enum SchedulingService {
     @discardableResult
     static func ensureOccurrence(
-        for task: Task,
+        for task: UserTask,
         reference: Date = Date(),
         calendar: Calendar = Calendar(identifier: .iso8601),
         ctx: ModelContext
@@ -66,7 +66,7 @@ enum SchedulingService {
         ctx: ModelContext,
         calendar: Calendar = Calendar(identifier: .iso8601)
     ) throws {
-        guard let completedAt = occ.completedDate else { return }
+        guard occ.completedDate != nil else { return }
         
         
         var profile = try ctx.fetch(FetchDescriptor<UserProfile>()).first

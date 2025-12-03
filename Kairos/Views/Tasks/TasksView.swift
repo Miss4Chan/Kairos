@@ -11,15 +11,15 @@ import SwiftData
 struct TasksView: View {
     @Environment(\.modelContext) private var ctx
     @Query(
-        filter: #Predicate<Task> { $0.isActive == true },
-        sort: [SortDescriptor(\Task.createdAt, order: .reverse)]
+        filter: #Predicate<UserTask> { $0.isActive == true },
+        sort: [SortDescriptor(\UserTask.createdAt, order: .reverse)]
     )
-    private var tasks: [Task]
+    private var tasks: [UserTask]
     
     @State private var editMode: EditMode = .inactive
     
     @State private var showNewTaskSheet = false
-    @State private var editingTask: Task?
+    @State private var editingTask: UserTask?
     
     var body: some View {
         NavigationStack {

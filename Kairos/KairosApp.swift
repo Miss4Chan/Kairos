@@ -19,7 +19,7 @@ struct KairosApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             UserProfile.self,
-            Task.self,
+            UserTask.self,
             TaskOccurrence.self,
             Category.self
         ])

@@ -40,7 +40,7 @@ struct NewTaskSheet: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
-                        let task = Task(
+                        let task = UserTask(
                             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                             notes: nil,
                             recurrence: recurrence,
