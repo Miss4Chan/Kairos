@@ -70,7 +70,6 @@ struct TasksView: View {
             .environment(\.editMode, $editMode)
             .sheet(isPresented: $showNewTaskSheet) {
                 NewTaskSheet { showNewTaskSheet = false }
-                    .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
             .sheet(item: $editingTask) { task in
