@@ -25,27 +25,27 @@ enum BadgeCatalog {
         ),
         Badge(
             name: "Apprentice",
-            description: "Reached level 5",
+            description: "Reached level 15",
             iconName: "star.lefthalf.fill",
             unlockLevel: 15
         ),
         Badge(
             name: "Achiever",
-            description: "Reached level 10",
+            description: "Reached level 30",
             iconName: "star.fill",
             unlockLevel: 30
         ),
         Badge(
             name: "Specialist",
-            description: "Reached level 20",
+            description: "Reached level 50",
             iconName: "rosette",
             unlockLevel: 50
         ),
         Badge(
             name: "Master",
-            description: "Reached level 30",
+            description: "Reached level 99",
             iconName: "crown.fill",
-            unlockLevel: 100
+            unlockLevel: 99
         )
     ]
     

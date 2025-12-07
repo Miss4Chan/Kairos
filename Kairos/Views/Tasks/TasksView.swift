@@ -19,6 +19,9 @@ struct TasksView: View {
     @State private var editMode: EditMode = .inactive
     
     @State private var showNewTaskSheet = false
+    
+    /// This is basically a routing state as it dictates when the sheet should be opened
+    /// Its different to the other which are just domain data this represents a navgation/presentation value 
     @State private var editingTask: UserTask?
     
     var body: some View {
@@ -38,12 +41,12 @@ struct TasksView: View {
                         TaskRowCell(
                             task: task,
                             isEditing: isEditing,
+                            /// Here we define the task and thus we enable the sheet that is opened since we activate the trigger whichnis a task object
                             onTap: { editingTask = task }
                         )
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
-                            //ctx.delete(tasks[index])
                             tasks[index].isActive = false
                         }
                         try? ctx.save()
@@ -52,6 +55,7 @@ struct TasksView: View {
             }
             .navigationTitle("Tasks")
             .navigationBarTitleDisplayMode(.large)
+            /// the default toolbar can be populated with various items 
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     EditButton()
@@ -67,6 +71,7 @@ struct TasksView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.25), value: editMode)
+            /// This is like passing a mode down the tree 
             .environment(\.editMode, $editMode)
             .sheet(isPresented: $showNewTaskSheet) {
                 NewTaskSheet { showNewTaskSheet = false }
@@ -74,7 +79,7 @@ struct TasksView: View {
             }
             .sheet(item: $editingTask) { task in
                 EditTaskSheet(task: task)
-                    .presentationDetents([.medium])
+                    .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
                     .onDisappear {
                         editMode = .inactive

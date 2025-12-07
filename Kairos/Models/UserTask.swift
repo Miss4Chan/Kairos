@@ -20,7 +20,8 @@ final class UserTask {
     var createdAt: Date
     var isActive: Bool
     
-    //Changed it to noAction and added snapshot fields in the TaskOccurrence
+    ///Changed it to noAction and added snapshot fields in the TaskOccurrence
+    ///This is kinda useless to have noAction since I never really delete I just soft-delete I changed that 
     @Relationship(deleteRule: .noAction, inverse: \TaskOccurrence.task)
     var occurrences: [TaskOccurrence] = []
     

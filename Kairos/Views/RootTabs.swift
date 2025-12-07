@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+///This is the view which does the top-level tab navigation
+///its a container that switches between child views using tabs, inside the tab view we add the views and we make them tab items
 struct RootTabs: View {
     var body: some View {
         TabView {
@@ -23,7 +25,10 @@ struct RootTabs: View {
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
-        }.background(.ultraThinMaterial)
+        }
+        /// Places a view behind another view; use when you need one view behind another
+        /// I use it to put material on it since I like the liquid glass look 
+        .background(.ultraThinMaterial)
     }
 }
 

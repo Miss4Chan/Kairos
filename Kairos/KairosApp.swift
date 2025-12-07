@@ -8,14 +8,21 @@
 import SwiftUI
 import SwiftData
 
+///This is the main entry for this app - App keyword is a protocol that is the SwiftUIs lifecycle
 @main
 struct KairosApp: App {
+    ///Appstorage it persist the values into the UserDefaults automatically and keep the swiftui synced with it
+    ///Its basically like a key-value pair so for the key appTheme we store the value
     @AppStorage("appTheme") private var appThemeRawValue: String = AppTheme.system.rawValue
 
+    ///since we wanna apply them everywhere we keep em globally
+    ///this here is a computed property which reverts to system in case this value is missing
     private var appTheme: AppTheme {
         AppTheme(rawValue: appThemeRawValue) ?? .system
     }
     
+    ///This is the model container which is kinda like the database + the schema all in one
+    ///here we create the obj and assign a folder as well as the schema and config to it
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             UserProfile.self,
@@ -48,5 +55,6 @@ struct KairosApp: App {
             ContentView().preferredColorScheme(appTheme.colorScheme)
         }
         .modelContainer(sharedModelContainer)
+        ///we inject the model container into the environment so all views can use the swiftdata functionalities (such as query)
     }
 }

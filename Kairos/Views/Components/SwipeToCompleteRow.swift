@@ -41,6 +41,10 @@ struct SwipeToCompleteRow: View {
             .materialCard(cornerRadius: 14, strokeOpacity: 0.06)
             .offset(x: offsetX)
             .gesture(
+                /// Offical docs says - A dragging motion that invokes an action as the drag-event sequence changes.
+                /// While dragging we track horizontal translation to offset the card.
+                /// When the drag crosses trigger we fire a one-time haptic.
+                /// On release if past trigger then complete otherwise spring back to zero
                 DragGesture()
                     .onChanged { value in
                         let dx = max(0, value.translation.width)

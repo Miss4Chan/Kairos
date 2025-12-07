@@ -28,6 +28,7 @@ struct TodayHeader: View {
                         } label: {
                             LevelChip(level: level)
                         }
+                        /// frame is the size/constraints of a view 
                         .frame(maxWidth: .infinity, alignment: .leading)
                         XPChip(xp: xp)
                             .frame(maxWidth: .infinity, alignment: .leading)

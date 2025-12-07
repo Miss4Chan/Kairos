@@ -11,6 +11,7 @@ import SwiftData
 struct NewTaskSheet: View {
     @Environment(\.modelContext) private var ctx
     
+    ///State is the owner the source of truth
     @State private var title: String = ""
     @State private var recurrence: RecurrenceType = .daily
     @State private var difficulty: Difficulty = .normal
@@ -21,6 +22,7 @@ struct NewTaskSheet: View {
     
     var onClose: () -> Void
     
+    /// In here the $something is a binding that is created from the @State
     var body: some View {
         NavigationStack {
             TaskFormView(
@@ -65,7 +67,7 @@ struct NewTaskSheet: View {
 
 #Preview("NewTaskSheet") {
     NewTaskSheet { }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
         .modelContainer(previewContainer)
 }

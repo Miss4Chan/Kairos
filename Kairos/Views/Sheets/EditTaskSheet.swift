@@ -11,6 +11,9 @@ import SwiftData
 struct EditTaskSheet: View {
     @Environment(\.modelContext) private var ctx
     @Environment(\.dismiss) private var dismiss
+    
+    /// Makes a SwiftData @Model object’s properties bindable in SwiftUI  so we can read/write
+    /// Basically it turns a model object into a form-friendly thing and it auto-generates the get,set for its fields - we need this in the form to make changes directly to something that is kept as a model object
     @Bindable var task: UserTask
     @State private var selectedCategory: Category?
     
@@ -70,6 +73,6 @@ struct EditTaskSheet: View {
     
     return EditTaskSheet(task: sample)
         .environment(\.modelContext, context)
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
 }

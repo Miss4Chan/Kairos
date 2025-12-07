@@ -62,7 +62,10 @@ struct TaskRowCell: View {
                     ))
             }
         }
+        /// Make the entire row tappable
         .contentShape(Rectangle())
+        /// performs and action when the user taps - I have this locked behind a bool
+        /// basically only allow tap-to-edit when the parent is in editing mode
         .onTapGesture { if isEditing { onTap() } }
         .padding(8)
         .accessibilityAddTraits(isEditing ? .isButton : [])

@@ -11,6 +11,7 @@ import SwiftData
 struct TaskFormView: View {
     @Query(sort: \Category.name) private var categories: [Category]
     
+    /// Binding means that its a reference to some other state that is owned by someone else (kinda like input and output in angular) 
     @Binding var title: String
     @Binding var recurrence: RecurrenceType
     @Binding var difficulty: Difficulty

@@ -8,17 +8,21 @@
 import Foundation
 import SwiftData
 
-//This is our VM and its different from the service even though it shares similar functions
-//He doesnt own the truth just delegates the service and acts as the glue that is between the stored data and the ui components
-//He gets action from the ui and says to the service "please complete this and tell me what i should update in my views"
-@MainActor //This means that its a singleton - it will be initialized once upon creaton and does not get recreated for every other call
+///This is our VM and its different from the service even though it shares similar functions
+///He doesnt own the truth just delegates the service and acts as the glue that is between the stored data and the ui components
+///He gets action from the ui and says to the service "please complete this and tell me what i should update in my views"
+@MainActor ///This means that this types methods run on the main thread
+///Observable object is a type of object with a publisher that emits before the object has changes and its an observation mechanism
 final class TaskListViewModel: ObservableObject {
-    // One-shot UI trigger for rewards (meme popup).
-    // SwiftData changes (occurrence completed / XP updated) refresh views, but they don't reliably mean
-    // “show a reward exactly once right now”. This published event lets the UI present the meme once
-    // per completion, without tying the popup to persisted state.
+    /// One-shot UI trigger for rewards (meme popup)
+    /// SwiftData changes (occurrence completed / XP updated) refresh views, but they don't reliably mean
+    /// “show a reward exactly once right now”, this published event lets the UI present the meme once
+    /// per completion, without tying the popup to persisted state.
+    /// This I use in the onChage inside the todayview basically to trigger view updates, its kinda like an observable flag
     @Published var completionEventID: UUID?
     
+    
+    /// Returns a human-friendly subtitle for a task in the given reference period (eg. "Today", "Due end of week ..")
     func subtitle(for task: UserTask,
                   reference: Date = Date(),
                   calendar: Calendar = Calendar(identifier: .iso8601)) -> String {
@@ -65,6 +69,7 @@ final class TaskListViewModel: ObservableObject {
         }
     }
     
+    /// Returns whether the task has been completed for the current recurrence period
     func isCompletedForCurrentPeriod(_ task: UserTask,
                                      ctx: ModelContext,
                                      reference: Date = Date(),
@@ -82,7 +87,7 @@ final class TaskListViewModel: ObservableObject {
         }
     }
     
-    
+    /// Filters the provided tasks down to those not completed in the current period
     func pendingTasks(from tasks: [UserTask],
                       ctx: ModelContext,
                       reference: Date = Date(),
@@ -92,6 +97,9 @@ final class TaskListViewModel: ObservableObject {
         }
     }
     
+    /// Marks the tasks current-period occurrence as complete and persists changes
+    /// Triggers completionEventID so the UI can show a one-time reward
+
     func complete(task: UserTask, ctx: ModelContext) throws {
         let occ = try SchedulingService.ensureOccurrence(for: task, ctx: ctx)
         

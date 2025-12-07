@@ -24,6 +24,7 @@ struct HistoryView: View {
     @State private var searchText: String = ""
     @State private var selectedCategoryID: UUID? = nil
     
+    /// We use this for focusing the search bar and making it sticky and opening the keyboard
     @FocusState private var searchFocused: Bool
     @State private var showHistoryInfo = false
     
@@ -64,6 +65,7 @@ struct HistoryView: View {
                                     title: vm.title(for: occ),
                                     xp: vm.xp(for: occ)
                                 )
+                                /// Add a swipe action and put a button that performs some type of action - different from the drag action?
                                 .swipeActions(edge: .trailing) {
                                     Button {
                                         try? SchedulingService.undo(occ, ctx: ctx)
@@ -80,9 +82,11 @@ struct HistoryView: View {
             .listStyle(.insetGrouped)
             .navigationTitle("History")
             .toolbar { toolbarContent }
+            /// marks the view as searchable and it configues the display of a search field + we place it and give it a focus var
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .searchFocused($searchFocused)
         }
+        //the modal for the alert when the condition is true
         .alert("Tip", isPresented: $showHistoryInfo) {
             Button("OK", role: .cancel) { }
         } message: {

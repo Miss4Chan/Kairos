@@ -12,6 +12,7 @@ import UIKit
 struct CategoriesSettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Category.name) private var categories: [Category]
+    @Query(filter: #Predicate<UserTask> { $0.isActive == true }) private var tasks: [UserTask]
     
     @State private var editMode: EditMode = .inactive
     
@@ -49,7 +50,7 @@ struct CategoriesSettingsView: View {
                     CategoryRowView(
                         category: category,
                         showsChevron: isEditing,
-                        usedCount: taskCount(for: category)
+                        usedCount: usageByCategoryID[category.id, default: 0]
                     )
                     .onTapGesture {
                         if isEditing {
@@ -125,21 +126,9 @@ struct CategoriesSettingsView: View {
     
     // MARK: - Actions
     
-    private func taskCount(for category: Category) -> Int {
-        let categoryID = category.id
-        
-        let fetch = FetchDescriptor<UserTask>(
-            predicate: #Predicate<UserTask> { task in
-                task.category?.id == categoryID
-            }
-        )
-        
-        do {
-            let tasksUsingCategory = try modelContext.fetch(fetch)
-            return tasksUsingCategory.count
-        } catch {
-            return 0
-        }
+    private var usageByCategoryID: [UUID: Int] {
+        Dictionary(grouping: tasks.compactMap { $0.category?.id }) { $0 }
+            .mapValues { $0.count }
     }
     
     private func startAddingCategory() {

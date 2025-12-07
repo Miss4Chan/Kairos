@@ -63,8 +63,7 @@ enum SchedulingService {
     
     static func undo(
         _ occ: TaskOccurrence,
-        ctx: ModelContext,
-        calendar: Calendar = Calendar(identifier: .iso8601)
+        ctx: ModelContext
     ) throws {
         guard occ.completedDate != nil else { return }
         
@@ -75,12 +74,10 @@ enum SchedulingService {
             ctx.insert(p); profile = p
         }
         
-        if let task = occ.task,
-           let xp = task.difficulty.xpReward as Int? {
-            let current = profile?.totalXP ?? 0
-            profile?.totalXP = max(0, current - xp)
-        }
-        
+        let difficulty = occ.snapshotDifficulty ?? occ.task?.difficulty
+        let xp = difficulty?.xpReward ?? 0
+        profile?.totalXP = max(0, (profile?.totalXP ?? 0) - xp)
+
         if let task = occ.task, task.recurrence == .none {
             task.isActive = true
         }

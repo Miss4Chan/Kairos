@@ -19,7 +19,7 @@ struct PreviewHarness<Content: View>: View {
 @MainActor
 let previewContainer: ModelContainer = {
     do {
-        let schema = Schema([UserProfile.self, UserTask.self, TaskOccurrence.self])
+        let schema = Schema([UserProfile.self, UserTask.self, TaskOccurrence.self, Category.self])
         let conf = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: schema, configurations: [conf])
         let ctx = ModelContext(container)
